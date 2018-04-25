@@ -1,5 +1,4 @@
 #include "gnl.h"
-#include <stdio.h>
 
 int		readsave(t_glst *c, char **out, t_gnl i, int r)
 {
@@ -27,8 +26,7 @@ int		readsave(t_glst *c, char **out, t_gnl i, int r)
 				c->sv[c->s] = i.tmp[c->s];
 	free(i.tmp);
 	free(i.buf);
-	r = c->s ? r : !(r == -1);
-	return (r);
+	return (c->s ? r : !(r == -1));
 }
 
 int		get_next_line(const int fd, char **out)
