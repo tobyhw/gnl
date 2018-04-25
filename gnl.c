@@ -3,7 +3,7 @@
 
 int		readsave(t_glst *c, char **out, t_gnl i, int r)
 {
-	while (c->sv && ++i.l <= c->s)
+	while (!(*out = NULL) && c->sv && ++i.l <= c->s)
 		if (c->sv[i.l] == '\n' && (*out = (char*)malloc(i.l + 1)))
 		{
 			c->sv = (c->s > i.l ? (char*)malloc(c->s - i.l) : NULL);
@@ -13,7 +13,7 @@ int		readsave(t_glst *c, char **out, t_gnl i, int r)
 			while (i.l--)
 				(*out)[i.l] = i.tmp[i.l] == '\n' ? 0 : i.tmp[i.l];
 			free(i.tmp);
-			return (-1);
+			return (1);
 		}
 	if ((i.buf = (char*)malloc(BUFF_SIZE)))
 		r = read(c->fd, i.buf, BUFF_SIZE);
@@ -24,10 +24,10 @@ int		readsave(t_glst *c, char **out, t_gnl i, int r)
 	if (c->sv && i.buf && i.l-- && !((!i.buf || (r && !c->sv)) && (r = 1)))
 		while (r-- && ((c->sv[r + c->s] = i.buf[r]) || !i.buf[r]))
 			while (!r && (c->s-- || (!(c->s = i.l) && i.l)))
-				if ((c->sv[c->s] = i.tmp[c->s]) && !c->s)
-					free(i.tmp);
-	r = c->s ? r : !(r == -1);
+				c->sv[c->s] = i.tmp[c->s];
+	free(i.tmp);
 	free(i.buf);
+	r = c->s ? r : !(r == -1);
 	return (r);
 }
 
@@ -48,10 +48,9 @@ int		get_next_line(const int fd, char **out)
 			c->s = 0;
 			f = c;
 		}
-	*out = NULL;
-	while (!(*out) && fd >= 0 && c && i.l == -1 && ((i.tmp = c->sv) || !c->sv))
+	while (out && fd >= 0 && c && i.l == -1 && ((i.tmp = c->sv) || !c->sv))
 		i.l = readsave(c, out, i, 0);
-	if (*out || (!i.l && !(c->sv = NULL)))
-		return (-i.l);
+	if ((out && i.l == 1 && *out) || (!i.l && !(c->sv = NULL)))
+		return (i.l);
 	return (-1);
 }
