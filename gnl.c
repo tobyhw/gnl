@@ -3,7 +3,7 @@
 
 int		readsave(t_glst *c, char **out, t_gnl i, int r)
 {
-	while (!(*out = NULL) && c->sv && ++i.l <= c->s)
+	while (c->sv && ++i.l <= c->s)
 		if (c->sv[i.l] == '\n' && (*out = (char*)malloc(i.l + 1)))
 		{
 			c->sv = (c->s > i.l ? (char*)malloc(c->s - i.l) : NULL);
@@ -48,11 +48,10 @@ int		get_next_line(const int fd, char **out)
 			c->s = 0;
 			f = c;
 		}
-	while (fd >= 0 && c && i.l == -1 && ((i.tmp = c->sv) || !c->sv))
-	{
+	*out = NULL;
+	while (!(*out) && fd >= 0 && c && i.l == -1 && ((i.tmp = c->sv) || !c->sv))
 		i.l = readsave(c, out, i, 0);
-		if ((i.l == -1 && *out) || (!i.l && !(c->sv = NULL)))
-			return (-i.l);
-	}
+	if (*out || (!i.l && !(c->sv = NULL)))
+		return (-i.l);
 	return (-1);
 }
