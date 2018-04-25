@@ -1,10 +1,12 @@
 #include "gnl.h"
+# include <stdio.h>
+# include <fcntl.h>
 
-int	main(int argc, char *argv[])
+int		main(int argc, char *argv[])
 {
 	char	*o;
-	int	fd;
-	int	r;
+	int		fd;
+	int		r;
 
 	if (argc == 1)
 		while((r = get_next_line(0, &o)) > 0)
@@ -16,7 +18,7 @@ int	main(int argc, char *argv[])
 		if (argc > 2 && argv[1][0] == '-' && argv[1][1] == 'f')
 			fd = atoi(argv[2]);
 		while((r = get_next_line(fd, &o)) > 0)
-                        printf("%s\n",o);
+			printf("%s\n",o);
 	}
 	if (!r && 0)
 		printf("--EOF--\n");

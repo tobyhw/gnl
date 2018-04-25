@@ -4,25 +4,23 @@
 # include <sys/types.h>
 # include <sys/uio.h>
 # include <unistd.h>
-# include <stdio.h>
-# include <fcntl.h>
-# define BUFF_SIZE 1
+# define BUFF_SIZE 8
 
 typedef struct	s_glst
 {
 	struct s_glst	*next;
-	int		fd;
-	char		*sv;
-	int		s;
-}		t_glst;
+	int				fd;
+	char			*sv;
+	int				s;
+}				t_glst;
 
 typedef struct	s_gnl
 {
 	char	*buf;
 	char	*tmp;
-	int	l;
-}		t_gnl;
+	int		l;
+}				t_gnl;
 
-int     get_next_line(const int fd, char **out);
+int     		get_next_line(const int fd, char **out);
 
 #endif
