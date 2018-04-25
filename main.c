@@ -16,7 +16,10 @@ int		main(int argc, char *argv[])
 		if (argc == 2)
 			fd = open(argv[1],O_RDONLY);
 		if (argc > 2 && argv[1][0] == '-' && argv[1][1] == 'f')
+		{
 			fd = atoi(argv[2]);
+			printf("%d %d\n",!(!(fd)),!(fd));
+		}
 		while((r = get_next_line(fd, &o)) > 0)
 			printf("%s\n",o);
 	}

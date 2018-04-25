@@ -15,17 +15,17 @@ int		readsave(t_glst *c, char **out, t_gnl i, int r)
 		return (-1);
 	}
 	if ((i.buf = (char*)malloc(BUFF_SIZE)))
-		if ((r = read(c->fd, i.buf, BUFF_SIZE)) && r > 0)
-			if ((c->sv = (char*)malloc(r + c->s + 1)))
-				if ((i.l = r + c->s) && !c->fd && r < BUFF_SIZE && r++ && i.l++)
-					i.buf[r - 1] = i.buf[r - 2] == '\n' ? 0 : '\n';
-	if (c->sv && r >= 0 && (!(c->sv[i.l] = (r == 0 ? '\n' : 0)) || c->s > 0))
+		r = read(c->fd, i.buf, BUFF_SIZE);
+	if (++r && (c->sv = (char*)malloc(r + c->s)))
+		i.l = r + c->s;
+	if (i.buf && !(i.buf[r - 1] = 0) && r <= !c->fd * BUFF_SIZE + !(!c->fd))
+		i.buf[r - 1] = i.buf[r - 1 - (!c->fd && r > 1)] == '\n' ? 0 : '\n';
+	if (c->sv && i.buf && i.l-- && !((!i.buf || (r && !c->sv)) && (r = 1)))
 		while (r-- && ((c->sv[r + c->s] = i.buf[r]) || !i.buf[r]))
-			while (!r && (c->s-- || !(c->s = i.l) || 0))
+			while (!r && (c->s-- || (!(c->s = i.l) && i.l)))
 				if ((c->sv[c->s] = i.tmp[c->s]) && !c->s)
 					free(i.tmp);
-	if (!((!i.buf || (r && !c->sv)) && !(r = 1)) && c->s && !c->sv[c->s - 1])
-		c->s--;
+	r = c->s ? r : !(r == -1);
 	free(i.buf);
 	return (r);
 }
