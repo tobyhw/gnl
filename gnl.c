@@ -3,17 +3,18 @@
 
 int		readsave(t_glst *c, char **out, t_gnl i, int r)
 {
-	if (i.l >= 0 && c->sv[i.l] == '\n' && (*out = (char*)malloc(i.l + 1)))
-	{
-		c->sv = (c->s > i.l ? (char*)malloc(c->s - i.l) : NULL);
-		if ((c->s = -1) && (c->sv || ++c->s))
-			while (i.tmp[++c->s + i.l + 1] || (c->sv[c->s] = 0))
-				c->sv[c->s] = i.tmp[c->s + i.l + 1];
-		while (i.l >= 0 && ((i.tmp[i.l] == '\n' && ((*out)[i.l] = 0)) || i.l--))
-			(*out)[i.l] = i.tmp[i.l];
-		free(i.tmp);
-		return (-1);
-	}
+	while (!(*out = NULL) && c->sv && ++i.l <= c->s)
+		if (c->sv[i.l] == '\n' && (*out = (char*)malloc(i.l + 1)))
+		{
+			c->sv = (c->s > i.l ? (char*)malloc(c->s - i.l) : NULL);
+			if (++i.l && (c->s = -1) && (c->sv || ++c->s))
+				while (i.tmp[++c->s + i.l] || (c->sv[c->s] = 0))
+					c->sv[c->s] = i.tmp[c->s + i.l];
+			while (i.l--)
+				(*out)[i.l] = i.tmp[i.l] == '\n' ? 0 : i.tmp[i.l];
+			free(i.tmp);
+			return (-1);
+		}
 	if ((i.buf = (char*)malloc(BUFF_SIZE)))
 		r = read(c->fd, i.buf, BUFF_SIZE);
 	if (++r && (c->sv = (char*)malloc(r + c->s)))
@@ -49,8 +50,6 @@ int		get_next_line(const int fd, char **out)
 		}
 	while (fd >= 0 && c && i.l == -1 && ((i.tmp = c->sv) || !c->sv))
 	{
-		while (!(*out = NULL) && c->sv && ++i.l < c->s && c->sv[i.l] != '\n')
-			;
 		i.l = readsave(c, out, i, 0);
 		if ((i.l == -1 && *out) || (!i.l && !(c->sv = NULL)))
 			return (-i.l);
