@@ -41,7 +41,7 @@ int		main(int argc, char *argv[])
 		printf("--EOF--\n");
 	if (r < 0)
 		printf("Error\n");
-	while((r = get_next_line(0, &o)) > 0)
+	while((r = get_next_line(0, &o)) > 0 && !(o[0] == 'q' && o[1] == 0))
 		free(o);
 	return (0);
 }

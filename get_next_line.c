@@ -6,7 +6,7 @@
 /*   By: twalpert <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/04/26 09:32:13 by twalpert          #+#    #+#             */
-/*   Updated: 2018/04/26 15:30:45 by twalpert         ###   ########.fr       */
+/*   Updated: 2018/04/26 16:33:30 by twalpert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ int		readsave(t_glst *c, char **out, t_gnl i, int r)
 	while (!(*out = NULL) && c->sv && ++i.l <= c->s)
 		if (c->sv[i.l] == '\n' && ((*out) = (char*)malloc(i.l + 1)))
 		{
-			c->sv = (c->s > i.l ? (char*)malloc(c->s - i.l + 1) : NULL);
+			c->sv = (c->s > i.l ? (char*)malloc(c->s - i.l + 2) : NULL);
 			if (++i.l && (c->s = -1) && (c->sv || ++c->s))
 				while (i.tmp[++c->s + i.l] || (c->sv[c->s] = 0))
 					c->sv[c->s] = i.tmp[c->s + i.l];
@@ -28,7 +28,7 @@ int		readsave(t_glst *c, char **out, t_gnl i, int r)
 		}
 	if ((i.buf = (char*)malloc(BUFF_SIZE + 1)))
 		r = read(c->fd, i.buf, BUFF_SIZE);
-	if (++r && (c->sv = (char*)malloc(r + c->s + 1)))
+	if (++r && (c->sv = (char*)malloc(r + c->s + 2)))
 		i.l = r + c->s;
 	if (i.buf && !(i.buf[r - 1] = 0) && r <= !c->fd * BUFF_SIZE + !(!c->fd))
 		i.buf[r - 1] = i.buf[r - 1 - (!c->fd && r > 1)] == '\n' ? 0 : '\n';
@@ -60,7 +60,8 @@ int		get_next_line(const int fd, char **out)
 		}
 	while (out && fd >= 0 && c && i.l == -1 && ((i.tmp = c->sv) || !c->sv))
 		i.l = readsave(c, out, i, 0);
-	if ((out && i.l == 1 && *out) || (!i.l))
+	!i.l && c->sv ? free(c->sv) : (i.l = i.l);
+	if ((out && i.l == 1 && *out) || (!i.l && !(c->sv = NULL)))
 		return (i.l);
 	return (-1);
 }
