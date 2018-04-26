@@ -1,11 +1,23 @@
-#include "gnl.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: twalpert <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2018/04/26 09:32:13 by twalpert          #+#    #+#             */
+/*   Updated: 2018/04/26 15:30:45 by twalpert         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "get_next_line.h"
 
 int		readsave(t_glst *c, char **out, t_gnl i, int r)
 {
 	while (!(*out = NULL) && c->sv && ++i.l <= c->s)
-		if (c->sv[i.l] == '\n' && (*out = (char*)malloc(i.l + 1)))
+		if (c->sv[i.l] == '\n' && ((*out) = (char*)malloc(i.l + 1)))
 		{
-			c->sv = (c->s > i.l ? (char*)malloc(c->s - i.l) : NULL);
+			c->sv = (c->s > i.l ? (char*)malloc(c->s - i.l + 1) : NULL);
 			if (++i.l && (c->s = -1) && (c->sv || ++c->s))
 				while (i.tmp[++c->s + i.l] || (c->sv[c->s] = 0))
 					c->sv[c->s] = i.tmp[c->s + i.l];
@@ -14,15 +26,15 @@ int		readsave(t_glst *c, char **out, t_gnl i, int r)
 			free(i.tmp);
 			return (1);
 		}
-	if ((i.buf = (char*)malloc(BUFF_SIZE)))
+	if ((i.buf = (char*)malloc(BUFF_SIZE + 1)))
 		r = read(c->fd, i.buf, BUFF_SIZE);
-	if (++r && (c->sv = (char*)malloc(r + c->s)))
+	if (++r && (c->sv = (char*)malloc(r + c->s + 1)))
 		i.l = r + c->s;
 	if (i.buf && !(i.buf[r - 1] = 0) && r <= !c->fd * BUFF_SIZE + !(!c->fd))
 		i.buf[r - 1] = i.buf[r - 1 - (!c->fd && r > 1)] == '\n' ? 0 : '\n';
 	if (c->sv && i.buf && i.l-- && !((!i.buf || (r && !c->sv)) && (r = 1)))
 		while (r-- && ((c->sv[r + c->s] = i.buf[r]) || !i.buf[r]))
-			while (!r && (c->s-- || (!(c->s = i.l) && i.l)))
+			while (!r && ((c->s-- && i.tmp) || (!(c->s = i.l) && i.l)))
 				c->sv[c->s] = i.tmp[c->s];
 	free(i.tmp);
 	free(i.buf);
@@ -48,7 +60,7 @@ int		get_next_line(const int fd, char **out)
 		}
 	while (out && fd >= 0 && c && i.l == -1 && ((i.tmp = c->sv) || !c->sv))
 		i.l = readsave(c, out, i, 0);
-	if ((out && i.l == 1 && *out) || (!i.l && !(c->sv = NULL)))
+	if ((out && i.l == 1 && *out) || (!i.l))
 		return (i.l);
 	return (-1);
 }
