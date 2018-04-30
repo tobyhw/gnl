@@ -6,7 +6,7 @@
 /*   By: twalpert <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/04/26 09:32:13 by twalpert          #+#    #+#             */
-/*   Updated: 2018/04/26 16:33:30 by twalpert         ###   ########.fr       */
+/*   Updated: 2018/04/27 12:32:14 by twalpert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,11 +28,11 @@ int		readsave(t_glst *c, char **out, t_gnl i, int r)
 		}
 	if ((i.buf = (char*)malloc(BUFF_SIZE + 1)))
 		r = read(c->fd, i.buf, BUFF_SIZE);
-	if (++r && (c->sv = (char*)malloc(r + c->s + 2)))
+	if (i.buf && ++r && (c->sv = (char*)malloc(r + c->s + 2)))
 		i.l = r + c->s;
-	if (i.buf && !(i.buf[r - 1] = 0) && r <= !c->fd * BUFF_SIZE + !(!c->fd))
+	if (r && !(i.buf[r - 1] = 0) && r <= !c->fd * BUFF_SIZE + !(!c->fd))
 		i.buf[r - 1] = i.buf[r - 1 - (!c->fd && r > 1)] == '\n' ? 0 : '\n';
-	if (c->sv && i.buf && i.l-- && !((!i.buf || (r && !c->sv)) && (r = 1)))
+	if ((c->sv && i.buf && i.l-- && r) || !(r = 1))
 		while (r-- && ((c->sv[r + c->s] = i.buf[r]) || !i.buf[r]))
 			while (!r && ((c->s-- && i.tmp) || (!(c->s = i.l) && i.l)))
 				c->sv[c->s] = i.tmp[c->s];
@@ -60,7 +60,7 @@ int		get_next_line(const int fd, char **out)
 		}
 	while (out && fd >= 0 && c && i.l == -1 && ((i.tmp = c->sv) || !c->sv))
 		i.l = readsave(c, out, i, 0);
-	!i.l && c->sv ? free(c->sv) : (i.l = i.l);
+	!i.l && c->sv ? free(c->sv) : (i.tmp = NULL);
 	if ((out && i.l == 1 && *out) || (!i.l && !(c->sv = NULL)))
 		return (i.l);
 	return (-1);
