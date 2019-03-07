@@ -16,15 +16,21 @@
 # include <sys/types.h>
 # include <sys/uio.h>
 # include <unistd.h>
+# define BUFF_SIZE 32
 
-# define BUFF_SIZE 64
+typedef struct	s_glst
+{
+	struct s_glst	*next;
+	int				fd;
+	char			*sv;
+	int				s;
+}				t_glst;
 
 typedef struct	s_gnl
 {
-	struct s_gnl	*next;
-	int				fd;
-	int				n;
-	char			str[BUFF_SIZE];
+	char	*buf;
+	char	*tmp;
+	int		l;
 }				t_gnl;
 
 int				get_next_line(const int fd, char **out);
