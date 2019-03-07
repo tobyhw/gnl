@@ -17,11 +17,11 @@
 # include <sys/uio.h>
 # include <unistd.h>
 
-# define BUFF_SIZE 32
+# define BUFF_SIZE 3
 
 typedef struct	s_gnl
 {
-	struct s_glst	*next;
+	struct s_gnl	*next;
 	int				fd;
 	int				n;
 	char			str[BUFF_SIZE];

@@ -11,8 +11,9 @@
 /* ************************************************************************** */
 
 #include "gnl.h"
+#include <stdio.h>
 
-int		line_out(t_gnl *elem, char **out, int n, int len)
+int		line_out(t_gnl *elem, char **out, int n, int l)
 {
 	t_gnl		*find;
 	t_gnl		*last;
@@ -20,20 +21,20 @@ int		line_out(t_gnl *elem, char **out, int n, int len)
 
 	find = elem;
 	while ((find = find->next))
-		len += find->fd == elem->fd ? find->n : 0;
-	if (!out || !(*out = malloc(len + n + 1)))
+		find->fd == elem->fd ? l += find->n : 0;
+	if (!out || !(*out = malloc(l + n + 1)))
 		return (-1);
-	(*out)[len + n] = '\0';
+	(*out)[l + n] = '\0';
 	i = -1;
-	while (elem->n-- && ++i < n && (((*out)[len + i] = elem->str[i]) || 1))
-		elem->str[i] = n < elem->n ? elem->str[n + i + 1] : 0;
+	while (++i < BUFF_SIZE && (i >= n || ((*out)[l + i] = elem->str[i]) || 1))
+		n + i + 1 < BUFF_SIZE ? elem->str[i] = elem->str[n + i + 1] : 0;
+	elem->n -= n + (elem->n > n);
 	last = elem;
 	while (last && (find = last->next))
 		if (!(i = find->n) || find->fd == elem->fd)
 		{
-			while (i-- && len--)
-				(*out)[len] = find->str[i];
-			last->next = find->next;
+			while ((i-- || ((last->next = find->next) && 0)) && l--)
+				(*out)[l] = find->str[i];
 			free(find);
 		}
 		else
@@ -43,20 +44,20 @@ int		line_out(t_gnl *elem, char **out, int n, int len)
 
 int		get_next_line(const int fd, char **out)
 {
-	static	 t_gnl		*save = NULL;
-	t_gnl				*elem;
+	static t_gnl	*save = NULL;
+	t_gnl			*elem;
 	int				flag;
 	int				i;
 
 	flag = 1;
 	while (flag >= 0 && ((elem = save) || !save))
 	{
-		while (!(i = 0) && elem && elem->fd != fd)
+		while (!(i = 0) && elem && (elem->fd != fd || !elem->n))
 			elem = elem->next;
 		while (elem && i < elem->n && elem->str[i] != '\n')
 			i++;
-		if ((elem && i < elem->n) || !flag)
-			return (elem && elem->n ? line_out(elem, out, i, 0) : 0);
+		if ((elem && (i < elem->n || (!fd && elem->n != BUFF_SIZE))) || !flag)
+			return (elem ? line_out(elem, out, i, 0) : 0);
 		elem = malloc(sizeof(t_gnl));
 		if (elem && (elem->n = read(fd, elem->str, BUFF_SIZE)) > 0)
 		{
