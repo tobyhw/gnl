@@ -41,6 +41,7 @@ int		line_out(t_gnl *elem, char **out, short n)
 		}
 		else
 			last = last->next;
+	return (1);
 }
 
 int		get_next_line(const int fd, char **out)
@@ -58,7 +59,7 @@ int		get_next_line(const int fd, char **out)
 		while (elem && i < elem->n && elem->str[i] != '\n')
 			i++;
 		if ((elem && i < elem->n) || !flag)
-			return (elem ? line_out(elem, out, i) : 0);
+			return (elem && elem->n ? line_out(elem, out, i) : 0);
 		elem = malloc(sizeof(t_gnl));
 		if (elem && (elem->n = read(fd, elem->str, BUFF_SIZE)) > 0)
 		{
