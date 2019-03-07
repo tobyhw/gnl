@@ -48,14 +48,14 @@ int		get_next_line(const int fd, char **out)
 	int				flag;
 	int				i;
 
-	flag = 1;
+	flag = BUFF_SIZE;
 	while (flag >= 0 && ((elem = save) || !save))
 	{
 		while (!(i = 0) && elem && (elem->fd != fd || !elem->n))
 			elem = elem->next;
 		while (elem && i < elem->n && elem->str[i] != '\n')
 			i++;
-		if ((elem && (i < elem->n || (!fd && elem->n != BUFF_SIZE))) || !flag)
+		if ((elem && i < elem->n) || flag < BUFF_SIZE)
 			return (elem ? line_out(elem, out, i, 0) : 0);
 		elem = malloc(sizeof(t_gnl));
 		if (elem && (elem->n = read(fd, elem->str, BUFF_SIZE)) > 0)
@@ -64,7 +64,7 @@ int		get_next_line(const int fd, char **out)
 			elem->next = save;
 			save = elem;
 		}
-		else if ((flag = elem ? elem->n : -1) - 1 && elem)
+		if ((flag = elem ? elem->n : -1) <= 0 && elem)
 			free(elem);
 	}
 	return (-1);
