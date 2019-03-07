@@ -12,16 +12,29 @@
 
 #include "gnl.h"
 
-int		line_out(t_gnl *save, char **out, short +flag, int fd)
+int		line_out(t_gnl *elem, char **out, short i, int fd)
 {
-	int		i;
+	t_gnl		*find;
+	t_gnl		*last;
+	int			len;
 
-	while (save && save->fd != fd)
-		save = save->next;
-	i = -1;
-	while (save && ++i < save->n)
-		if (save->str[i] == '\n' || (!*flag && i == save->n - 1))
-			return ((*flag = 1));
+	len = i;
+	find = elem;
+	while ((find = find->next))
+		len += find->fd == elem->fd ? find->n : 0;
+	if (!out || !(*out = malloc(len + 1)))
+		return (-1);
+	(*out)[len] = '\0';
+	len = -1;
+	while ((find = elem))
+	{
+		i = -1;
+		last = elem;
+		while ((find = find->next))
+			last = find->fd == elem->fd ? find : last;
+		while (++i < last->n && last->str[i] != '\n')
+			(*out)[++len] = last->str[i];
+	}
 }
 
 int		get_next_line(const int fd, char **out)
@@ -29,16 +42,26 @@ int		get_next_line(const int fd, char **out)
 	static	 t_gnl		*save = NULL;
 	t_gnl				*elem;
 	short				flag;
+	short				i;
 
 	flag = 1;
-	while (!line_out(save, out, &flag, fd) && (elem = malloc(sizeof(t_gnl))))
-		if ((elem->n = read(fd, elem->str, BUFF_SIZE)) > 0)
+	while (flag >= 0 && ((elem = save) || !save))
+	{
+		while (!(i = 0) && elem && elem->fd != fd)
+			elem = elem->next;
+		while (elem && i < elem->n && elem->str[i] != '\n')
+			i++;
+		if ((elem && i < elem->n) || !flag)
+			return (elem ? line_out(elem, out, i) : 0);
+		elem = malloc(sizeof(t_gnl));
+		if (elem && (elem->n = read(fd, elem->str, BUFF_SIZE)) > 0)
 		{
 			elem->fd = fd;
 			elem->next = save;
 			save = elem;
 		}
-		else if ((flag = elem->n))
+		else if ((flag = elem ? elem->n : -1) - 1 && elem)
 			free(elem);
-	return (flag);
+	}
+	return (-1);
 }
