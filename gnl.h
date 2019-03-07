@@ -22,8 +22,8 @@
 typedef struct	s_gnl
 {
 	struct s_glst	*next;
-	short			fd;
-	short			n;
+	int				fd;
+	int				n;
 	char			str[BUFF_SIZE];
 }				t_gnl;
 
