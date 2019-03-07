@@ -12,29 +12,35 @@
 
 #include "gnl.h"
 
-int		line_out(t_gnl *elem, char **out, short i, int fd)
+int		line_out(t_gnl *elem, char **out, short n)
 {
 	t_gnl		*find;
 	t_gnl		*last;
 	int			len;
+	int			i;
 
-	len = i;
+	len = 0;
 	find = elem;
 	while ((find = find->next))
 		len += find->fd == elem->fd ? find->n : 0;
-	if (!out || !(*out = malloc(len + 1)))
+	if (!out || !(*out = malloc(len + n + 1)))
 		return (-1);
-	(*out)[len] = '\0';
-	len = -1;
-	while ((find = elem))
-	{
-		i = -1;
-		last = elem;
-		while ((find = find->next))
-			last = find->fd == elem->fd ? find : last;
-		while (++i < last->n && last->str[i] != '\n')
-			(*out)[++len] = last->str[i];
-	}
+	(*out)[len + n] = '\0';
+	i = -1;
+	while (++i < n && (((*out)[len + i] = elem->str[i]) || 1))
+		elem->str[i] = n + i + 1 < elem->n ? elem->str[n + i + 1] : 0;
+	elem->n -= n + 1;
+	last = elem;
+	while (last && (find = last->next))
+		if (!(i = find->n) || find->fd == elem->fd)
+		{
+			while (i-- && len--)
+				(*out)[len] = find->str[i];
+			last->next = find->next;
+			free(find);
+		}
+		else
+			last = last->next;
 }
 
 int		get_next_line(const int fd, char **out)
