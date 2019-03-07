@@ -17,7 +17,7 @@
 # include <sys/uio.h>
 # include <unistd.h>
 
-# define BUFF_SIZE 3
+# define BUFF_SIZE 64
 
 typedef struct	s_gnl
 {

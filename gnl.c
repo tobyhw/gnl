@@ -13,7 +13,7 @@
 #include "gnl.h"
 #include <stdio.h>
 
-int		line_out(t_gnl *elem, char **out, int n, int l)
+int		line_out(t_gnl *elem, char **out, int end, int len)
 {
 	t_gnl		*find;
 	t_gnl		*last;
@@ -21,20 +21,20 @@ int		line_out(t_gnl *elem, char **out, int n, int l)
 
 	find = elem;
 	while ((find = find->next))
-		find->fd == elem->fd ? l += find->n : 0;
-	if (!out || !(*out = malloc(l + n + 1)))
+		find->fd == elem->fd ? len += find->n : 0;
+	if (!out || !(*out = malloc(len + end + 1)))
 		return (-1);
-	(*out)[l + n] = '\0';
+	(*out)[len + end] = '\0';
 	i = -1;
-	while (++i < BUFF_SIZE && (i >= n || ((*out)[l + i] = elem->str[i]) || 1))
-		n + i + 1 < BUFF_SIZE ? elem->str[i] = elem->str[n + i + 1] : 0;
-	elem->n -= n + (elem->n > n);
+	while (++i < elem->n && (i >= end || ((*out)[len + i] = elem->str[i]) || 1))
+		end + i + 1 < elem->n ? elem->str[i] = elem->str[end + i + 1] : 0;
+	elem->n -= end + (elem->n > end);
 	last = elem;
 	while (last && (find = last->next))
 		if (!(i = find->n) || find->fd == elem->fd)
 		{
-			while ((i-- || ((last->next = find->next) && 0)) && l--)
-				(*out)[l] = find->str[i];
+			while ((i-- || ((last->next = find->next) && 0)) && len--)
+				(*out)[len] = find->str[i];
 			free(find);
 		}
 		else
