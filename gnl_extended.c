@@ -27,17 +27,25 @@ int		line_out(t_gnl **find, char **out, int end, int fd)
 	(*out)[len + end] = '\0';
 	i = -1;
 	lst = *find;
-	while (++i < lst->n && (i >= end || ((*out)[len + i] = lst->str[i]) || 1))
-		end + i + 1 < lst->n ? lst->str[i] = lst->str[end + i + 1] : 0;
+	while (++i < end)
+		(*out)[len + i] = lst->str[i];
+	while (++i < lst->n)
+		lst->str[i - end - 1] = lst->str[i];
 	if ((lst->n -= end + (lst->n > end)))
 		find = &(*find)->next;
-	else if ((*find = lst->next) || 1)
+	else
+	{
+		*find = lst->next;
 		free(lst);
+	}
 	while ((lst = *find))
 		if (lst->fd == fd || !(find = &(*find)->next))
-			while (*find == lst && (((*out)[--len] = lst->str[--lst->n]) || 1))
-				if (!lst->n && ((*find = lst->next) || 1))
-					free(lst);
+		{
+			while (lst->n--)
+				(*out)[--len] = lst->str[lst->n];
+			*find = lst->next;
+			free(lst);
+		}
 	return (1);
 }
 
@@ -50,21 +58,30 @@ int		get_next_line(const int fd, char **out)
 	int				i;
 
 	flag = BUFF_SIZE;
-	while (flag >= !BUFF_SIZE && (find = &save))
+	while (flag >= !BUFF_SIZE)
 	{
+		find = &save;
 		while (*find && (*find)->fd != fd)
 			find = &(*find)->next;
-		i = 0;
-		while (*find && i < (*find)->n && (*find)->str[i] != '\n')
-			i++;
-		if ((*find && i < (*find)->n) || flag != BUFF_SIZE)
-			return (*find ? line_out(find, out, i, fd) : 0);
+		if (*find)
+		{
+			i = 0;
+			while (i < (*find)->n && (*find)->str[i] != '\n')
+				i++;
+			if (i < (*find)->n || flag != BUFF_SIZE)
+				return (line_out(find, out, i, fd));
+		}
+		else if (!flag)
+			return (0);
 		new = malloc(sizeof(t_gnl));
-		if (new && (new->n = read(fd, new->str, BUFF_SIZE)) > 0
-			&& (new->fd = fd) >= 0
-			&& ((new->next = save) || !save))
+		if ((flag = new ? read(fd, new->str, BUFF_SIZE) : -1) > 0)
+		{
+			new->n = flag;
+			new->fd = fd;
+			new->next = save;
 			save = new;
-		if ((flag = new ? new->n : -1) <= 0 && new)
+		}
+		else if (new)
 			free(new);
 	}
 	return (-1);
