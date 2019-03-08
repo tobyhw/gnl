@@ -52,8 +52,9 @@ int		get_next_line(const int fd, char **out)
 	flag = BUFF_SIZE;
 	while (flag >= !BUFF_SIZE && (find = &save))
 	{
-		while (!(i = 0) && *find && ((*find)->fd != fd || !(*find)->n))
+		while (*find && ((*find)->fd != fd || !(*find)->n))
 			find = &(*find)->next;
+		i = 0;
 		while (*find && i < (*find)->n && (*find)->str[i] != '\n')
 			i++;
 		if ((*find && i < (*find)->n) || flag != BUFF_SIZE || !flag)
