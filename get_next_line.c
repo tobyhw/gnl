@@ -12,60 +12,59 @@
 
 #include "get_next_line.h"
 
-int		line_out(t_gnl *elem, char **out, int end, int len)
+int		line_out(t_gnl **find, char **out, int end, int fd)
 {
-	t_gnl		*find;
-	t_gnl		*last;
+	t_gnl		*lst;
 	int			i;
+	int			len;
 
-	find = elem;
-	while ((find = find->next))
-		find->fd == elem->fd ? len += find->n : 0;
+	len = 0;
+	lst = *find;
+	while ((lst = lst->next))
+		lst->fd == fd ? len += lst->n : 0;
 	if (!out || !(*out = malloc(len + end + 1)))
 		return (-1);
 	(*out)[len + end] = '\0';
 	i = -1;
-	while (++i < elem->n && (i >= end || ((*out)[len + i] = elem->str[i]) || 1))
-		end + i + 1 < elem->n ? elem->str[i] = elem->str[end + i + 1] : 0;
-	elem->n -= end + (elem->n > end);
-	last = elem;
-	while (last && (find = last->next))
-		if (!(i = find->n) || find->fd == elem->fd)
-		{
-			while ((i-- || ((last->next = find->next) && 0)) && len--)
-				(*out)[len] = find->str[i];
-			free(find);
-		}
-		else
-			last = last->next;
+	lst = *find;
+	while (++i < lst->n && (i >= end || ((*out)[len + i] = lst->str[i]) || 1))
+		end + i + 1 < lst->n ? lst->str[i] = lst->str[end + i + 1] : 0;
+	if ((lst->n -= end + (lst->n > end)))
+		find = &(*find)->next;
+	else if ((*find = lst->next) || 1)
+		free(lst);
+	while ((lst = *find))
+		if (lst->fd == fd || !(find = &(*find)->next))
+			while (*find == lst && (((*out)[--len] = lst->str[--lst->n]) || 1))
+				if (!lst->n && ((*find = lst->next) || 1))
+					free(lst);
 	return (1);
 }
 
 int		get_next_line(const int fd, char **out)
 {
 	static t_gnl	*save = NULL;
-	t_gnl			*elem;
+	t_gnl			**find;
+	t_gnl			*new;
 	int				flag;
 	int				i;
 
 	flag = BUFF_SIZE;
-	while (flag >= 0 && ((elem = save) || !save))
+	while (flag >= !BUFF_SIZE && (find = &save))
 	{
-		while (!(i = 0) && elem && (elem->fd != fd || !elem->n))
-			elem = elem->next;
-		while (elem && i < elem->n && elem->str[i] != '\n')
+		while (!(i = 0) && *find && ((*find)->fd != fd || !(*find)->n))
+			find = &(*find)->next;
+		while (*find && i < (*find)->n && (*find)->str[i] != '\n')
 			i++;
-		if ((elem && i < elem->n) || flag < BUFF_SIZE)
-			return (elem ? line_out(elem, out, i, 0) : 0);
-		elem = malloc(sizeof(t_gnl));
-		if (elem && (elem->n = read(fd, elem->str, BUFF_SIZE)) > 0)
-		{
-			elem->fd = fd;
-			elem->next = save;
-			save = elem;
-		}
-		if ((flag = elem ? elem->n : -1) <= 0 && elem)
-			free(elem);
+		if ((*find && i < (*find)->n) || flag != BUFF_SIZE || !flag)
+			return (*find ? line_out(find, out, i, fd) : 0);
+		new = malloc(sizeof(t_gnl));
+		if (new && (new->n = read(fd, new->str, BUFF_SIZE)) > 0
+			&& (new->fd = fd) >= 0
+			&& ((new->next = save) || !save))
+			save = new;
+		if ((flag = new ? new->n : -1) <= 0 && new)
+			free(new);
 	}
 	return (-1);
 }
