@@ -52,12 +52,12 @@ int		get_next_line(const int fd, char **out)
 	flag = BUFF_SIZE;
 	while (flag >= !BUFF_SIZE && (find = &save))
 	{
+		while (*find && (*find)->fd != fd)
+			find = &(*find)->next;
 		i = -1;
-		while (*find && ((*find)->fd != fd || ++i < (*find)->n))
-			if ((i > -1 || !(find = &(*find)->next)) && (*find)->str[i] == '\n')
-				break ;
-		if ((*find && i < (*find)->n) || flag != BUFF_SIZE)
-			return (*find ? line_out(find, out, i, fd) : 0);
+		while ((*find && (++i < (*find)->n || flag != BUFF_SIZE)) || !flag)
+			if (!*find || i == (*find)->n || (*find)->str[i] == '\n')
+				return (*find ? line_out(find, out, i, fd) : 0);
 		new = malloc(sizeof(t_gnl));
 		if (new && (new->n = read(fd, new->str, BUFF_SIZE)) > 0
 			&& (new->fd = fd) >= 0
