@@ -26,18 +26,18 @@ int		line_out(t_gnl **find, char **out, int end, int fd)
 		return (-1);
 	(*out)[len + end] = '\0';
 	i = -1;
-	lst = *find;
-	while (++i < lst->n && (i >= end || ((*out)[len + i] = lst->str[i]) || 1))
-		end + i + 1 < lst->n ? lst->str[i] = lst->str[end + i + 1] : 0;
-	if ((lst->n -= end + (lst->n > end)))
+	while (++i < (*find)->n && (i != end || ++i))
+		if (i > end || (((*out)[len + i] = (*find)->str[i]) && 0))
+			(*find)->str[i - end - 1] = (*find)->str[i];
+	if (((*find)->n -= end + ((*find)->n > end)))
 		find = &(*find)->next;
-	else if ((*find = lst->next) || 1)
-		free(lst);
 	while ((lst = *find))
-		if (lst->fd == fd || !(find = &(*find)->next))
-			while (*find == lst && (((*out)[--len] = lst->str[--lst->n]) || 1))
-				if (!lst->n && ((*find = lst->next) || 1))
-					free(lst);
+		if (lst->fd == fd && lst->n)
+			while (lst->n)
+				(*out)[--len] = lst->str[--lst->n];
+		else if (lst->fd == fd || !(find = &(*find)->next))
+			if ((*find = lst->next) || 1)
+				free(lst);
 	return (1);
 }
 
