@@ -28,7 +28,7 @@ int		line_out(void **find, char **out, int end, int fd)
 	i = -1;
 	find = lst;
 	while (++i < COUNT && (i >= end || ((*out)[len + i] = STR[i]) || 1))
-		end + i + 1 < COUNT ? STR[i] = STR[end + i + 1] : 0;
+		i > end ? STR[i - end - 1] = STR[i] : 0;
 	if ((COUNT -= end + (COUNT > end)))
 		find = &NEXT;
 	while ((lst = *find))
@@ -54,9 +54,9 @@ int		get_next_line(const int fd, char **out)
 	{
 		while (!(i = 0) && *find && FD != fd)
 			find = &NEXT;
-		while (*find && i <	COUNT &&	STR[i] != '\n')
+		while (*find && i < COUNT && STR[i] != '\n')
 			i++;
-		if ((*find && i <	COUNT) || flag != BUFF_SIZE)
+		if ((*find && i < COUNT) || flag != BUFF_SIZE)
 			return (*find ? line_out(find, out, i, fd) : 0);
 		new = malloc(BUFF_SIZE + 16);
 		find = &new;
