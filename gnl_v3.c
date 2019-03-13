@@ -26,7 +26,7 @@ int		line_out(t_gnl **find, char **out, int end, int fd)
 		return (-1);
 	(*out)[len + end] = '\0';
 	i = -1;
-	while (++i < (*find)->n && (i != end || ++i))
+	while ((++i != end || ++i) && i < (*find)->n)
 		if (i > end || (((*out)[len + i] = (*find)->str[i]) && 0))
 			(*find)->str[i - end - 1] = (*find)->str[i];
 	if (((*find)->n -= end + ((*find)->n > end)))
