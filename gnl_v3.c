@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "gnl_v3.h"
 
 int		line_out(t_gnl **find, char **out, int end, int fd)
 {
